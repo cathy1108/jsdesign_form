@@ -3,41 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>捷士設計 | 需求引導系統</title>
+    <title>捷士設計 | 預約裝修諮詢表</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f8fafc; }
-        .animate-in { animation: fadeIn 0.4s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; background: #f59e0b; border-radius: 50%; cursor: pointer; border: 4px solid white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #fdfbf7; color: #4a4a4a; overflow-x: hidden; }
+        .animate-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .home-bg {
+            background-image: linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), url('https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&q=80&w=1200');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .btn-warm {
+            background: linear-gradient(135deg, #d4a373 0%, #a98467 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-warm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -10px rgba(169, 132, 103, 0.6);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #a98467;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useMemo } = React;
+        const { useState } = React;
         
+        const LOGO_URL = "https://raw.githubusercontent.com/yushen-design/assets/main/js_logo.jpg";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbysrdEDmwiASZTG2Lz7IbHBjhqC_BPU2AOuAy2x5Lboy9q_SGSWX4arb-2PxWF_q9c5Ag/exec";
+
+        const STYLES = [
+            { id: 'scandinavian', title: '北歐簡約', img: 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&q=80&w=400' },
+            { id: 'modern-luxury', title: '現代輕奢', img: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=400' },
+            { id: 'muji', title: '無印風', img: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=400' },
+            { id: 'japandi', title: '侘寂禪風', img: 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&q=80&w=400' },
+            { id: 'industrial', title: '工業復古', img: 'https://images.unsplash.com/photo-1505691723518-36a5ac3be353?auto=format&fit=crop&q=80&w=400' },
+            { id: 'other', title: '其他', img: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&q=80&w=400' }
+        ];
+
         const Icon = ({ name, className = "" }) => {
             const icons = {
-                home: <g><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></g>,
-                check: <polyline points="20 6 9 17 4 12"/>,
                 chevronRight: <polyline points="9 18 15 12 9 6"/>,
                 chevronLeft: <polyline points="15 18 9 12 15 6"/>,
-                sparkles: <g><path d="m12 3 1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></g>,
-                user: <g><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></g>,
-                mapPin: <g><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></g>,
-                calendar: <g><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></g>,
-                refresh: <g><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></g>,
-                users: <g><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></g>,
-                message: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                instagram: <g><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></g>,
+                heart: <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>,
+                check: <polyline points="20 6 9 17 4 12"/>,
+                loader: <g><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></g>
             };
             return (
                 <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -46,167 +85,131 @@
             );
         };
 
-        const STYLE_OPTIONS = [
-            { id: 'nordic', title: '北歐', img: 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&q=80&w=400' },
-            { id: 'minimalist', title: '極簡', img: 'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&q=80&w=400' },
-            { id: 'wabisabi', title: '侘寂', img: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=400' },
-            { id: 'industrial', title: '工業', img: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&q=80&w=400' },
-            { id: 'modern', title: '現代', img: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=400' },
-            { id: 'muji', title: '無印', img: 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&q=80&w=400' }
-        ];
-
-        const LOCATIONS = ['台北市', '新北市', '桃園', '基隆', '其他'];
-        const SPACE_USES = ['住家', '店面', '辦公空間'];
-        const SERVICES = ['室內設計與裝潢', '預售屋客變'];
-        const PURPOSES = ['長期自住', '短期自住', '出租', '賣房']; // 已將租屋改為出租
-        const SOURCE_CHANNELS = ['Google', 'IG', 'Facebook', '官方網站', '設計家', '其他'];
-        const MEMBER_SPECIAL_NEEDS = ['無', '有小朋友', '有長輩', '有寵物'];
-
         const INITIAL_STATE = {
-            name: '', phone: '', lineId: '',
-            location: '', otherLocation: '', address: '',
-            houseAge: 0, spaceUse: '住家', service: '室內設計與裝潢',
-            size: 25, budget: '100-200 萬',
-            preferredStyles: [], otherStyle: '',
-            familyCount: 2, familyFuture: '否', 
-            hasSpecialMember: ['無'],
+            name: '', phone: '', lineId: '', contactTime: '10:00-12:00',
+            houseAge: '0', 
+            spaceType: '住家', spaceTypeOther: '',
+            serviceType: '室內設計與裝潢',
+            location: '台北市', locationOther: '',
+            caseName: '',
+            isHandover: '是', handoverDate: '',
+            size: 25, 
+            budget: '100-200 萬',
+            startDate: '', endDate: '',
+            preferredStyles: [], preferredStylesOther: '',
+            familyCount: '1',
+            hasSpecialMember: [],
+            isFutureFlex: '不需要',
             purpose: '長期自住',
-            sources: [], otherSource: '', 
-            startDate: '', endDate: '', contactTime: '10:00 - 12:00',
+            source: 'Instagram', sourceOther: '',
             note: ''
         };
 
         function App() {
             const [step, setStep] = useState(0);
+            const [formData, setFormData] = useState(INITIAL_STATE);
             const [isSubmitting, setIsSubmitting] = useState(false);
             const [isSuccess, setIsSuccess] = useState(false);
-            const [formData, setFormData] = useState(INITIAL_STATE);
-
-            // ⚠️ 請確保此 URL 與您的 Google Apps Script 部署 URL 一致
-            const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzAbYpfxP805_XQWb7pLmDkXUiEHY5My03O87q76fTLs5Bukgqv8gzUpcU5SRhhv80/exec";
 
             const nextStep = () => setStep(s => s + 1);
             const prevStep = () => setStep(s => s - 1);
-            const handleReset = () => { setFormData(INITIAL_STATE); setIsSuccess(false); setStep(0); };
 
-            const canGoNext = useMemo(() => {
-                if (step === 1) {
-                    const phoneValid = formData.phone.length === 10 && /^\d+$/.test(formData.phone);
-                    return formData.name && phoneValid;
-                }
-                if (step === 2) return formData.location && (formData.location !== '其他' || formData.otherLocation) && formData.address;
-                if (step === 3) return formData.preferredStyles.length > 0;
-                if (step === 5) return formData.hasSpecialMember.length > 0;
-                if (step === 6) return formData.sources.length > 0;
-                return true;
-            }, [step, formData]);
+            const isPhoneValid = formData.phone.length === 10;
+            const canGoNextStep1 = formData.name.trim() !== '' && isPhoneValid;
 
-            const toggleList = (field, value) => {
+            const handleToggle = (field, value) => {
                 setFormData(prev => ({
                     ...prev,
-                    [field]: prev[field].includes(value) 
-                        ? prev[field].filter(x => x !== value) 
+                    [field]: prev[field].includes(value)
+                        ? prev[field].filter(v => v !== value)
                         : [...prev[field], value]
                 }));
             };
 
-            const toggleSpecialMember = (value) => {
-                setFormData(prev => {
-                    let newList;
-                    if (value === '無') {
-                        newList = ['無'];
-                    } else {
-                        newList = prev.hasSpecialMember.filter(x => x !== '無');
-                        if (newList.includes(value)) {
-                            newList = newList.filter(x => x !== value);
-                        } else {
-                            newList.push(value);
-                        }
-                        if (newList.length === 0) newList = ['無'];
-                    }
-                    return { ...prev, hasSpecialMember: newList };
-                });
-            };
-
             const handleSubmit = async () => {
                 setIsSubmitting(true);
-                const queryData = {
+                
+                const finalPreferredStyles = [...formData.preferredStyles];
+                if (formData.preferredStylesOther) finalPreferredStyles.push(`其他: ${formData.preferredStylesOther}`);
+
+                const queryParams = new URLSearchParams({
                     ...formData,
-                    location: formData.location === '其他' ? `其他(${formData.otherLocation})` : formData.location,
-                    preferredStyles: formData.preferredStyles.map(s => s === '其他' ? `其他(${formData.otherStyle})` : s).join(', '),
-                    sources: formData.sources.map(s => s === '其他' ? `其他(${formData.otherSource})` : s).join(', '),
+                    preferredStyles: finalPreferredStyles.join(', '),
                     hasSpecialMember: formData.hasSpecialMember.join(', '),
                     timestamp: new Date().toLocaleString()
-                };
+                });
 
-                const queryParams = new URLSearchParams(queryData);
                 try {
-                    await fetch(`${GOOGLE_SCRIPT_URL}?${queryParams.toString()}`, { method: "POST", mode: "no-cors" });
+                    await fetch(`${GOOGLE_SCRIPT_URL}?${queryParams.toString()}`, {
+                        method: "POST",
+                        mode: "no-cors"
+                    });
                     setIsSuccess(true);
                 } catch (e) {
-                    alert("傳送失敗，請聯繫客服");
+                    console.error(e);
+                    alert("提交失敗，請檢查網路連線。");
                 } finally {
                     setIsSubmitting(false);
                 }
             };
 
-            const stepsCount = 7;
-
             return (
-                <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
-                    {/* 進度條 */}
-                    <div className="fixed top-0 left-0 w-full h-1.5 bg-slate-200 z-50">
-                        <div className="h-full bg-amber-500 transition-all duration-700" style={{ width: `${(step / stepsCount) * 100}%` }}></div>
-                    </div>
-
-                    <div className="w-full max-w-[480px] bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200 overflow-hidden flex flex-col min-h-[760px] relative border border-white">
-                        <div className="flex-1 p-8 overflow-y-auto custom-scroll flex flex-col justify-center">
+                <div className={`min-h-screen flex items-center justify-center p-4 transition-all duration-1000 ${step === 0 ? 'home-bg' : 'bg-stone-50'}`}>
+                    
+                    <div className={`w-full max-w-[480px] rounded-[3rem] overflow-hidden flex flex-col min-h-[760px] shadow-2xl transition-all duration-500 ${step === 0 ? 'glass-card' : 'bg-white border border-stone-100'}`}>
+                        
+                        <div className="flex-1 p-8 md:p-10 flex flex-col justify-center custom-scrollbar overflow-y-auto">
                             
-                            {/* Step 0: 歡迎頁 */}
+                            {/* Step 0: 封面 */}
                             {step === 0 && (
-                                <div className="text-center space-y-8 animate-in">
-                                    <div className="w-24 h-24 bg-amber-50 rounded-full flex items-center justify-center mx-auto text-amber-600 shadow-inner">
-                                        <Icon name="home" className="w-10 h-10"/>
+                                <div className="text-center space-y-10 animate-in">
+                                    <div className="space-y-6">
+                                        <div className="w-28 h-28 rounded-full mx-auto p-1 bg-white shadow-md overflow-hidden border border-stone-100">
+                                            <img src={LOGO_URL} alt="Logo" className="w-full h-full object-cover rounded-full" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <h2 className="text-stone-400 font-medium tracking-[0.2em] text-xs uppercase">J.S Interior Design</h2>
+                                            <h1 className="text-2xl md:text-3xl font-bold text-stone-800">捷士設計 <span className="font-light text-stone-300 mx-1">|</span> 預約諮詢</h1>
+                                        </div>
                                     </div>
-                                    <div className="space-y-3">
-                                        <h1 className="text-3xl font-bold text-slate-800 tracking-tight">捷士設計 需求引導</h1>
-                                        <p className="text-slate-500 text-base leading-relaxed">為了提供最精確的報價與規劃，<br/>請撥冗填寫以下資訊，讓我們更了解您的需求。</p>
+                                    <div className="space-y-6 text-stone-600 leading-relaxed font-light text-sm md:text-base">
+                                        <p className="text-lg font-medium text-stone-700">讓我們走進您的理想生活。</p>
+                                        <div className="pt-2">
+                                            <a href="https://www.instagram.com/j.s.interior.design/" target="_blank" className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-stone-100 text-xs font-medium hover:bg-stone-50 transition-all">
+                                                <Icon name="instagram" className="w-4 h-4"/> j.s.interior.design
+                                            </a>
+                                        </div>
                                     </div>
-                                    <button onClick={nextStep} className="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-slate-800 active:scale-[0.98] transition-all shadow-lg shadow-slate-200">
-                                        開始填寫 <Icon name="chevronRight" className="w-5 h-5"/>
+                                    <button onClick={nextStep} className="btn-warm w-full py-5 text-white rounded-2xl font-bold flex items-center justify-center gap-3">
+                                        開啟諮詢表單 <Icon name="chevronRight" className="w-5 h-5"/>
                                     </button>
                                 </div>
                             )}
 
-                            {/* Step 1: 基本資料 */}
+                            {/* Step 1: 基本資訊 & 時段 */}
                             {step === 1 && (
-                                <div className="space-y-6 animate-in">
-                                    <h2 className="text-2xl font-bold flex items-center gap-3 text-slate-800"><Icon name="user" className="text-amber-500"/> 聯絡資訊</h2>
+                                <div className="animate-in space-y-6">
+                                    <div className="space-y-2">
+                                        <h2 className="text-2xl font-bold text-stone-800 tracking-tight">您好，該如何稱呼？</h2>
+                                        <p className="text-stone-400 text-sm">請留下您的聯絡方式與方便聯絡的時間</p>
+                                    </div>
                                     <div className="space-y-4">
                                         <div className="space-y-1.5">
-                                            <label className="text-sm font-bold text-slate-600 ml-1">姓名 *</label>
-                                            <input className="w-full p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 outline-none focus:border-amber-400 focus:bg-white transition-all" placeholder="您的姓名" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">您的姓名</label>
+                                            <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="例如：林先生" className="w-full p-4 rounded-xl border border-stone-100 bg-stone-50 outline-none focus:bg-white focus:ring-2 focus:ring-stone-100 transition-all" />
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="text-sm font-bold text-slate-600 ml-1">聯絡電話 *</label>
-                                            <input 
-                                                className={`w-full p-4 rounded-2xl border-2 bg-slate-50 outline-none transition-all ${formData.phone && (formData.phone.length !== 10 || !/^\d+$/.test(formData.phone)) ? 'border-red-200 focus:border-red-400' : 'border-slate-100 focus:border-amber-400 focus:bg-white'}`} 
-                                                placeholder="請輸入 10 位數字電話" 
-                                                maxLength="10"
-                                                value={formData.phone} 
-                                                onChange={e => setFormData({...formData, phone: e.target.value.replace(/\D/g, '')})} 
-                                            />
-                                            {formData.phone && formData.phone.length !== 10 && <p className="text-xs text-red-500 font-medium ml-2">請輸入正確的手機號碼格式</p>}
+                                            <div className="flex justify-between items-center ml-1">
+                                                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider">聯絡電話</label>
+                                                {formData.phone && !isPhoneValid && <span className="text-[10px] text-red-400 font-medium">需為 10 位數字</span>}
+                                            </div>
+                                            <input type="tel" maxLength="10" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value.replace(/\D/g, '')})} placeholder="例如：0912345678" className={`w-full p-4 rounded-xl border bg-stone-50 outline-none transition-all ${formData.phone && !isPhoneValid ? 'border-red-100' : 'border-stone-100'}`} />
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="text-sm font-bold text-slate-600 ml-1">Line ID (選填)</label>
-                                            <input className="w-full p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 outline-none focus:border-amber-400 focus:bg-white transition-all" placeholder="方便我們聯繫您" value={formData.lineId} onChange={e => setFormData({...formData, lineId: e.target.value})} />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-bold text-slate-600 ml-1">方便聯絡時段</label>
+                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">方便聯絡的時段</label>
                                             <div className="grid grid-cols-1 gap-2">
-                                                {['10:00 - 12:00', '13:00 - 18:00', '18:00 - 21:00'].map(t => (
-                                                    <button key={t} onClick={() => setFormData({...formData, contactTime: t})} className={`py-4 rounded-2xl border-2 text-sm font-bold transition-all ${formData.contactTime === t ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-100' : 'bg-white text-slate-500 border-slate-100'}`}>{t}</button>
+                                                {['10:00-12:00', '13:00-18:00', '18:00-21:00'].map(t => (
+                                                    <button key={t} onClick={() => setFormData({...formData, contactTime: t})} className={`p-3 rounded-xl border-2 text-sm font-medium text-left px-4 transition-all ${formData.contactTime === t ? 'border-stone-800 bg-stone-50' : 'border-stone-50 bg-white text-stone-400'}`}>{t}</button>
                                                 ))}
                                             </div>
                                         </div>
@@ -214,239 +217,199 @@
                                 </div>
                             )}
 
-                            {/* Step 2: 屋況地點 */}
+                            {/* Step 2-6: 其他中間頁面 (略，代碼邏輯同前，僅保留架構以確保完整性) */}
                             {step === 2 && (
-                                <div className="space-y-6 animate-in">
-                                    <h2 className="text-2xl font-bold flex items-center gap-3 text-slate-800"><Icon name="mapPin" className="text-amber-500"/> 屋況與地點</h2>
-                                    <div className="space-y-5">
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-bold text-slate-600 ml-1">房屋地點 *</label>
-                                            <div className="grid grid-cols-3 gap-2">
-                                                {LOCATIONS.map(l => (
-                                                    <button key={l} onClick={() => setFormData({...formData, location: l})} className={`py-3 rounded-2xl border-2 text-sm font-bold transition-all ${formData.location === l ? 'bg-amber-500 text-white border-amber-500 shadow-md' : 'bg-white text-slate-500 border-slate-100'}`}>{l}</button>
-                                                ))}
-                                            </div>
-                                            {formData.location === '其他' && <input className="w-full p-4 rounded-2xl border-2 border-amber-200 bg-amber-50 text-sm animate-in outline-none" placeholder="請填寫具體地區" value={formData.otherLocation} onChange={e => setFormData({...formData, otherLocation: e.target.value})} />}
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <label className="text-sm font-bold text-slate-600 ml-1">建案名稱或詳細地址 *</label>
-                                            <input className="w-full p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 outline-none focus:border-amber-400 focus:bg-white transition-all" placeholder="例如：捷士花園 12F" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
-                                        </div>
-                                        
+                                <div className="animate-in space-y-6">
+                                    <h2 className="text-2xl font-bold text-stone-800">房屋狀況與地點</h2>
+                                    <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-1.5">
-                                                <label className="text-sm font-bold text-slate-600 ml-1">屋齡 (年)</label>
-                                                <input type="number" min="0" className="w-full p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 outline-none focus:border-amber-400" value={formData.houseAge} onChange={e => setFormData({...formData, houseAge: e.target.value})} />
+                                                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider">屋齡</label>
+                                                <input type="number" value={formData.houseAge} onChange={e => setFormData({...formData, houseAge: e.target.value})} className="w-full p-3 rounded-xl border border-stone-100 bg-stone-50 outline-none" />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <label className="text-sm font-bold text-slate-600 ml-1">空間用途</label>
-                                                <select className="w-full p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 outline-none font-bold text-slate-700" value={formData.spaceUse} onChange={e => setFormData({...formData, spaceUse: e.target.value})}>
-                                                    {SPACE_USES.map(s => <option key={s} value={s}>{s}</option>)}
+                                                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider">地點</label>
+                                                <select value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="w-full p-3 rounded-xl border border-stone-100 bg-stone-50 outline-none text-sm">
+                                                    {['台北市', '新北市', '桃園', '基隆', '其他'].map(l => <option key={l} value={l}>{l}</option>)}
                                                 </select>
                                             </div>
                                         </div>
+                                        {formData.location === '其他' && (
+                                            <input type="text" placeholder="請填寫具體地點" value={formData.locationOther} onChange={e => setFormData({...formData, locationOther: e.target.value})} className="w-full p-3 rounded-xl border border-stone-200 text-sm outline-none" />
+                                        )}
                                         <div className="space-y-1.5">
-                                            <label className="text-sm font-bold text-slate-600 ml-1">需要的服務</label>
-                                            <select className="w-full p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 outline-none font-bold text-slate-700" value={formData.service} onChange={e => setFormData({...formData, service: e.target.value})}>
-                                                {SERVICES.map(s => <option key={s} value={s}>{s}</option>)}
-                                            </select>
+                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider">建案名稱 / 詳細地址</label>
+                                            <input type="text" value={formData.caseName} onChange={e => setFormData({...formData, caseName: e.target.value})} placeholder="例如：捷士大樓" className="w-full p-3 rounded-xl border border-stone-100 bg-stone-50 outline-none" />
                                         </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Step 3: 風格 */}
-                            {step === 3 && (
-                                <div className="space-y-6 animate-in">
-                                    <h2 className="text-2xl font-bold flex items-center gap-3 text-slate-800"><Icon name="sparkles" className="text-amber-500"/> 風格選擇</h2>
-                                    <div className="space-y-4">
-                                        <label className="text-sm font-bold text-slate-600 ml-1">預計風格 (可複選) *</label>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            {STYLE_OPTIONS.map(s => (
-                                                <div 
-                                                    key={s.id} 
-                                                    onClick={() => toggleList('preferredStyles', s.title)} 
-                                                    className={`cursor-pointer rounded-[2rem] border-2 p-2 text-center transition-all ${formData.preferredStyles.includes(s.title) ? 'border-amber-500 bg-amber-50 shadow-lg shadow-amber-100' : 'border-slate-50 hover:border-slate-200 bg-slate-50'}`}
-                                                >
-                                                    <img src={s.img} className="w-full h-24 object-cover rounded-[1.5rem] mb-3" />
-                                                    <span className={`text-sm font-bold ${formData.preferredStyles.includes(s.title) ? 'text-amber-700' : 'text-slate-600'}`}>{s.title}</span>
-                                                </div>
-                                            ))}
-                                            <div 
-                                                onClick={() => toggleList('preferredStyles', '其他')} 
-                                                className={`flex items-center justify-center border-2 rounded-[2rem] text-sm font-bold h-[154px] cursor-pointer transition-all ${formData.preferredStyles.includes('其他') ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-50 bg-slate-50 hover:border-slate-200 text-slate-400'}`}
-                                            >
-                                                其他
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider">交屋狀態</label>
+                                            <div className="flex gap-2">
+                                                {['是', '否'].map(h => (
+                                                    <button key={h} onClick={() => setFormData({...formData, isHandover: h})} className={`flex-1 p-3 rounded-xl border-2 text-sm font-bold ${formData.isHandover === h ? 'border-stone-800 bg-stone-50' : 'border-stone-50 bg-white text-stone-400'}`}>已交屋: {h}</button>
+                                                ))}
                                             </div>
                                         </div>
-                                        {formData.preferredStyles.includes('其他') && (
-                                            <input 
-                                                className="w-full p-4 rounded-2xl border-2 border-amber-200 bg-amber-50 text-sm animate-in outline-none" 
-                                                placeholder="請描述您喜好的風格特色..." 
-                                                value={formData.otherStyle} 
-                                                onChange={e => setFormData({...formData, otherStyle: e.target.value})} 
-                                            />
+                                        {formData.isHandover === '否' && (
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider">預計交屋時間</label>
+                                                <input type="date" value={formData.handoverDate} onChange={e => setFormData({...formData, handoverDate: e.target.value})} className="w-full p-3 rounded-xl border border-stone-100 bg-stone-50 outline-none" />
+                                            </div>
                                         )}
                                     </div>
                                 </div>
                             )}
 
-                            {/* Step 4: 坪數預算 */}
+                            {step === 3 && (
+                                <div className="animate-in space-y-8">
+                                    <h2 className="text-2xl font-bold text-stone-800">坪數與工程預算</h2>
+                                    <div className="space-y-6">
+                                        <div className="text-center">
+                                            <div className="mb-2"><span className="text-5xl font-black text-stone-800">{formData.size}</span><span className="text-lg text-stone-300 ml-2">坪</span></div>
+                                            <input type="range" min="5" max="100" value={formData.size} onChange={e => setFormData({...formData, size: e.target.value})} className="w-full h-1.5 bg-stone-100 rounded-lg appearance-none cursor-pointer" />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {['100 萬以下', '100-150 萬', '150-200 萬', '200-300 萬', '300-500 萬', '500 萬以上'].map(b => (
+                                                <button key={b} onClick={() => setFormData({...formData, budget: b})} className={`p-3 rounded-xl border-2 text-xs font-bold transition-all ${formData.budget === b ? 'border-stone-800 bg-stone-50' : 'border-stone-50 bg-white text-stone-400'}`}>{b}</button>
+                                            ))}
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4 pt-4">
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider">可開工日期</label>
+                                                <input type="date" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} className="w-full p-3 rounded-xl border border-stone-100 bg-stone-50 outline-none text-xs" />
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider">預計完工日</label>
+                                                <input type="date" value={formData.endDate} onChange={e => setFormData({...formData, endDate: e.target.value})} className="w-full p-3 rounded-xl border border-stone-100 bg-stone-50 outline-none text-xs" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             {step === 4 && (
-                                <div className="space-y-8 animate-in">
-                                    <h2 className="text-2xl font-bold flex items-center gap-3 text-slate-800"><Icon name="sparkles" className="text-amber-500"/> 坪數與預算</h2>
-                                    <div className="space-y-8">
-                                        <div className="bg-slate-50 p-8 rounded-[2.5rem] space-y-6 border border-white">
-                                            <div className="flex justify-between items-end">
-                                                <span className="text-base font-bold text-slate-500">室內坪數 *</span>
-                                                <span className="text-4xl font-black text-amber-600 tracking-tight">{formData.size} <span className="text-lg font-normal">坪</span></span>
-                                            </div>
-                                            <input type="range" min="5" max="150" className="w-full accent-amber-500 h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer" value={formData.size} onChange={e => setFormData({...formData, size: e.target.value})} />
-                                            <div className="flex justify-between text-xs font-bold text-slate-400 px-1">
-                                                <span>5坪</span><span>50坪</span><span>100坪</span><span>150坪</span>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-3">
-                                            <label className="text-sm font-bold text-slate-600 ml-1">裝潢預算區間</label>
-                                            <div className="grid grid-cols-1 gap-2.5">
-                                                {['100 萬以下', '100-200 萬', '200-500 萬', '500 萬以上'].map(b => (
-                                                    <button 
-                                                        key={b} 
-                                                        onClick={() => setFormData({...formData, budget: b})} 
-                                                        className={`py-5 rounded-2xl border-2 text-base font-bold transition-all ${formData.budget === b ? 'bg-slate-800 text-white border-slate-800 shadow-xl' : 'bg-white text-slate-500 border-slate-100 hover:border-slate-300'}`}
-                                                    >
-                                                        {b}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Step 5: 成員與目的 */}
-                            {step === 5 && (
-                                <div className="space-y-6 animate-in">
-                                    <h2 className="text-2xl font-bold flex items-center gap-3 text-slate-800"><Icon name="users" className="text-amber-500"/> 成員與目的</h2>
+                                <div className="animate-in space-y-6">
+                                    <h2 className="text-2xl font-bold text-stone-800">預計居住成員</h2>
                                     <div className="space-y-5">
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-1.5">
-                                                <label className="text-sm font-bold text-slate-600 ml-1">居住人數</label>
-                                                <input type="number" min="1" className="w-full p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 outline-none focus:border-amber-400" value={formData.familyCount} onChange={e => setFormData({...formData, familyCount: e.target.value})} />
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">居住人數 (自填數字)</label>
+                                            <div className="relative">
+                                                <input type="number" value={formData.familyCount} onChange={e => setFormData({...formData, familyCount: e.target.value})} className="w-full p-4 rounded-xl border border-stone-100 bg-stone-50 outline-none pr-12" />
+                                                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-300">人</span>
                                             </div>
-                                            <div className="space-y-1.5">
-                                                <label className="text-sm font-bold text-slate-600 ml-1">預留變動空間</label>
-                                                <div className="flex border-2 border-slate-100 rounded-2xl overflow-hidden h-[60px] bg-slate-50 p-1">
-                                                    {['是', '否'].map(opt => (
-                                                        <button key={opt} onClick={() => setFormData({...formData, familyFuture: opt})} className={`flex-1 text-sm font-bold rounded-xl transition-all ${formData.familyFuture === opt ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>{opt}</button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-bold text-slate-600 ml-1">成員需求 (可複選) *</label>
-                                            <div className="grid grid-cols-2 gap-2.5">
-                                                {MEMBER_SPECIAL_NEEDS.map(opt => (
-                                                    <button 
-                                                        key={opt} 
-                                                        onClick={() => toggleSpecialMember(opt)} 
-                                                        className={`py-4 rounded-2xl border-2 text-sm font-bold transition-all ${formData.hasSpecialMember.includes(opt) ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-100' : 'bg-white text-slate-400 border-slate-100 hover:bg-slate-50'}`}
-                                                    >
-                                                        {opt}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-bold text-slate-600 ml-1">裝潢目的</label>
-                                            <div className="grid grid-cols-2 gap-2.5">
-                                                {PURPOSES.map(p => (
-                                                    <button key={p} onClick={() => setFormData({...formData, purpose: p})} className={`py-4 rounded-2xl border-2 text-sm font-bold transition-all ${formData.purpose === p ? 'border-slate-800 bg-slate-800 text-white shadow-xl' : 'border-slate-100 text-slate-400 hover:border-slate-300'}`}>{p}</button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Step 6: 得知管道與其他 */}
-                            {step === 6 && (
-                                <div className="space-y-6 animate-in">
-                                    <h2 className="text-2xl font-bold flex items-center gap-3 text-slate-800"><Icon name="calendar" className="text-amber-500"/> 最後一步</h2>
-                                    <div className="space-y-5">
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-1.5">
-                                                <label className="text-sm font-bold text-slate-600 ml-1">期待開工</label>
-                                                <input type="date" className="w-full p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 text-sm outline-none focus:border-amber-400" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} />
-                                            </div>
-                                            <div className="space-y-1.5">
-                                                <label className="text-sm font-bold text-slate-600 ml-1">期待完工</label>
-                                                <input type="date" className="w-full p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 text-sm outline-none focus:border-amber-400" value={formData.endDate} onChange={e => setFormData({...formData, endDate: e.target.value})} />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-bold text-slate-600 ml-1">得知管道 (可複選) *</label>
-                                            <div className="grid grid-cols-3 gap-2">
-                                                {SOURCE_CHANNELS.map(s => (
-                                                    <div 
-                                                        key={s} 
-                                                        onClick={() => toggleList('sources', s)} 
-                                                        className={`p-3 rounded-xl border-2 text-[11px] font-bold cursor-pointer text-center transition-all ${formData.sources.includes(s) ? 'border-amber-500 bg-amber-50 text-amber-700 shadow-sm' : 'border-slate-100 text-slate-400 bg-slate-50 hover:border-slate-300'}`}
-                                                    >
-                                                        {s}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            {formData.sources.includes('其他') && <input className="w-full p-4 rounded-2xl border-2 border-amber-200 bg-amber-50 text-sm mt-2 animate-in outline-none" placeholder="請填寫來源管道" value={formData.otherSource} onChange={e => setFormData({...formData, otherSource: e.target.value})} />}
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="text-sm font-bold text-slate-600 ml-1 flex items-center gap-2"><Icon name="message" className="w-4 h-4"/> 備註或其他需求</label>
-                                            <textarea className="w-full p-5 rounded-2xl border-2 border-slate-100 bg-slate-50 text-sm h-32 outline-none focus:border-amber-400 focus:bg-white custom-scroll resize-none" placeholder="您可以補充任何特別的想法或是您最在意的空間需求..." value={formData.note} onChange={e => setFormData({...formData, note: e.target.value})}></textarea>
+                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">是否預留變動空間</label>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {['不需要', '需要'].map(f => (
+                                                    <button key={f} onClick={() => setFormData({...formData, isFutureFlex: f})} className={`p-4 rounded-xl border-2 text-sm font-bold ${formData.isFutureFlex === f ? 'border-stone-800 bg-stone-50' : 'border-stone-50 bg-white text-stone-400'}`}>{f}</button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">成員組成 (複選)</label>
+                                            <div className="grid grid-cols-3 gap-2">
+                                                {['小朋友', '長輩', '寵物'].map(m => (
+                                                    <button key={m} onClick={() => handleToggle('hasSpecialMember', m)} className={`p-3 rounded-xl border-2 text-xs font-bold ${formData.hasSpecialMember.includes(m) ? 'border-stone-800 bg-stone-50' : 'border-stone-50 bg-white text-stone-400'}`}>{m}</button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">裝潢目的</label>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {['長期自住', '短期自住', '出租', '出售'].map(p => (
+                                                    <button key={p} onClick={() => setFormData({...formData, purpose: p})} className={`p-3 rounded-xl border-2 text-xs font-bold ${formData.purpose === p ? 'border-stone-800 bg-stone-50' : 'border-stone-50 bg-white text-stone-400'}`}>{p}</button>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             )}
 
-                            {/* Step 7: 送出頁 */}
+                            {step === 5 && (
+                                <div className="animate-in space-y-6">
+                                    <h2 className="text-2xl font-bold text-stone-800 text-center">心儀的風格方向</h2>
+                                    <div className="grid grid-cols-2 gap-3 max-h-[480px] overflow-y-auto pr-2 custom-scrollbar">
+                                        {STYLES.map(s => (
+                                            <div key={s.id} onClick={() => handleToggle('preferredStyles', s.title)} className={`group relative rounded-xl overflow-hidden cursor-pointer border-4 transition-all ${formData.preferredStyles.includes(s.title) ? 'border-stone-800' : 'border-transparent'}`}>
+                                                <img src={s.img} alt={s.title} className="w-full h-28 object-cover" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-2">
+                                                    <span className="text-white text-[10px] font-bold tracking-wider">{s.title}</span>
+                                                </div>
+                                                {formData.preferredStyles.includes(s.title) && (
+                                                    <div className="absolute top-1 right-1 bg-stone-800 text-white rounded-full p-1"><Icon name="check" className="w-3 h-3"/></div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {formData.preferredStyles.includes('其他') && (
+                                        <input type="text" placeholder="請描述您喜好的風格細節" value={formData.preferredStylesOther} onChange={e => setFormData({...formData, preferredStylesOther: e.target.value})} className="w-full p-4 rounded-xl border border-stone-200 text-sm outline-none animate-in" />
+                                    )}
+                                </div>
+                            )}
+
+                            {step === 6 && (
+                                <div className="animate-in space-y-6">
+                                    <h2 className="text-2xl font-bold text-stone-800">如何得知捷士設計？</h2>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {['Instagram', 'Facebook', 'Google (Map/AI)', '官方網站', '設計家', '親友推薦', '其他'].map(s => (
+                                            <button key={s} onClick={() => setFormData({...formData, source: s})} className={`p-3 rounded-xl border-2 text-xs font-bold transition-all ${formData.source === s ? 'border-stone-800 bg-stone-50' : 'border-stone-50 bg-white text-stone-400'}`}>{s}</button>
+                                        ))}
+                                    </div>
+                                    {formData.source === '其他' && (
+                                        <input type="text" placeholder="請填寫具體管道" value={formData.sourceOther} onChange={e => setFormData({...formData, sourceOther: e.target.value})} className="w-full p-3 rounded-xl border border-stone-200 text-sm outline-none" />
+                                    )}
+                                    <div className="pt-2">
+                                        <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">有什麼話想對我們說的嗎？</label>
+                                        <textarea value={formData.note} onChange={e => setFormData({...formData, note: e.target.value})} rows="4" placeholder="歡迎提供更多您的需求..." className="w-full mt-2 p-4 rounded-xl border border-stone-100 bg-stone-50 outline-none focus:bg-white transition-all resize-none text-sm"></textarea>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Step 7: 送出頁面 (保留返回按鈕) */}
                             {step === 7 && (
                                 <div className="text-center space-y-8 animate-in">
-                                    <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto shadow-inner ${isSuccess ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'}`}>
-                                        <Icon name={isSuccess ? "check" : "sparkles"} className="w-10 h-10"/>
+                                    <div className="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center mx-auto">
+                                        <Icon name={isSuccess ? "check" : "heart"} className={`w-10 h-10 ${isSuccess ? "text-green-500" : "text-stone-200"}`} />
                                     </div>
                                     <div className="space-y-3">
-                                        <h2 className="text-3xl font-bold text-slate-800">{isSuccess ? '送出成功！' : '資料確認'}</h2>
-                                        <p className="text-slate-500 text-base leading-relaxed">{isSuccess ? '感謝您的填寫！我們將儘快在您方便的時段致電洽詢，為您開啟美好的裝修規劃。' : '請確認資訊填寫正確，點擊下方按鈕正式送出需求單。'}</p>
+                                        <h2 className="text-2xl font-bold text-stone-800">{isSuccess ? "送出成功！" : "最後確認"}</h2>
+                                        <p className="text-stone-400 text-sm">{isSuccess ? "我們將在 1-3 個工作天內聯繫您。" : "確認以上資訊無誤即可送出"}</p>
                                     </div>
+                                    {!isSuccess && (
+                                        <div className="p-5 bg-stone-50 rounded-2xl text-left text-[11px] space-y-1.5 border border-stone-100 max-h-[200px] overflow-y-auto">
+                                            <p className="flex justify-between"><span className="text-stone-400">業主：</span><span className="font-bold">{formData.name}</span></p>
+                                            <p className="flex justify-between"><span className="text-stone-400">時段：</span><span className="font-bold">{formData.contactTime}</span></p>
+                                            <p className="flex justify-between"><span className="text-stone-400">地點：</span><span className="font-bold">{formData.location !== '其他' ? formData.location : formData.locationOther}</span></p>
+                                            <p className="flex justify-between"><span className="text-stone-400">建案：</span><span className="font-bold">{formData.caseName}</span></p>
+                                            <p className="flex justify-between"><span className="text-stone-400">居住：</span><span className="font-bold">{formData.familyCount} 人</span></p>
+                                            <p className="flex justify-between"><span className="text-stone-400">預算：</span><span className="font-bold">{formData.budget}</span></p>
+                                        </div>
+                                    )}
                                     {isSuccess ? (
-                                        <button onClick={handleReset} className="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-slate-800 shadow-xl active:scale-[0.98] transition-all">
-                                            <Icon name="refresh" className="w-5 h-5"/> 再次填寫案件
-                                        </button>
+                                        <button onClick={() => window.location.reload()} className="w-full py-5 bg-stone-900 text-white rounded-2xl font-bold">返回首頁</button>
                                     ) : (
-                                        <button onClick={handleSubmit} disabled={isSubmitting} className="w-full py-5 bg-amber-500 text-white rounded-2xl font-bold shadow-xl shadow-amber-100 hover:bg-amber-600 active:scale-[0.98] transition-all disabled:bg-amber-300 disabled:cursor-not-allowed">
-                                            {isSubmitting ? '正在為您傳送需求...' : '確認並送出'}
-                                        </button>
+                                        <div className="space-y-3">
+                                            <button onClick={handleSubmit} disabled={isSubmitting} className="w-full py-5 bg-stone-900 text-white rounded-2xl font-bold flex items-center justify-center gap-3">
+                                                {isSubmitting ? <Icon name="loader" className="w-5 h-5 animate-spin" /> : "確認並送出"}
+                                            </button>
+                                            <button onClick={prevStep} disabled={isSubmitting} className="w-full py-4 text-stone-400 font-medium text-sm flex items-center justify-center gap-2">
+                                                <Icon name="chevronLeft" className="w-4 h-4"/> 資訊有誤？返回修改
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             )}
                         </div>
 
-                        {/* 下方控制按鈕 */}
-                        {step > 0 && (
-                            <div className="px-8 pb-8 bg-white border-t border-slate-50 pt-6 flex gap-3">
-                                {(!isSuccess || step === 7) && (
-                                    <button onClick={prevStep} className="p-5 rounded-2xl border-2 border-slate-100 text-slate-400 hover:bg-slate-50 active:scale-[0.95] transition-all">
-                                        <Icon name="chevronLeft" className="w-6 h-6"/>
-                                    </button>
-                                )}
-                                {step < 7 && (
-                                    <button 
-                                        onClick={nextStep} 
-                                        disabled={!canGoNext}
-                                        className={`flex-1 py-5 rounded-2xl font-bold text-base transition-all active:scale-[0.98] ${canGoNext ? 'bg-slate-900 text-white hover:bg-slate-800 shadow-xl shadow-slate-200' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
-                                    >
-                                        下一頁
-                                    </button>
-                                )}
+                        {/* 下方控制按鈕 (僅限中間步驟) */}
+                        {step > 0 && step < 7 && (
+                            <div className="px-8 pb-10 flex gap-4">
+                                <button onClick={prevStep} className="p-5 rounded-2xl bg-stone-50 text-stone-300">
+                                    <Icon name="chevronLeft" className="w-6 h-6"/>
+                                </button>
+                                <button onClick={nextStep} disabled={step === 1 && !canGoNextStep1} className="flex-1 py-5 bg-stone-900 text-white rounded-2xl font-bold disabled:bg-stone-50 disabled:text-stone-200 transition-all flex items-center justify-center gap-2">
+                                    下一頁 <Icon name="chevronRight" className="w-5 h-5"/>
+                                </button>
                             </div>
                         )}
                     </div>
