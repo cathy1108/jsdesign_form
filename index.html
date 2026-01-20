@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>捷士設計 | 預約裝修諮詢表</title>
+    <title>捷士設計 | 預約裝修諮詢</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -31,24 +31,89 @@
             background: linear-gradient(135deg, #d4a373 0%, #a98467 100%);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .btn-warm:hover {
+        .btn-warm:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 12px 24px -10px rgba(169, 132, 103, 0.6);
         }
 
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 24px;
-            width: 24px;
-            border-radius: 50%;
-            background: #a98467;
+        .flow-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
             cursor: pointer;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+        }
+        .flow-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #e5e2de;
+            position: relative;
+            transition: all 0.3s ease;
+            border: 2px solid white;
+        }
+        .flow-dot.active { 
+            background: #a98467; 
+            transform: scale(1.3);
+            box-shadow: 0 0 0 4px rgba(169, 132, 103, 0.1);
+        }
+        .flow-line-container {
+            position: absolute;
+            top: 6px;
+            left: 12%;
+            right: 12%;
+            height: 2px;
+            background: #f1efed;
+            z-index: 0;
+        }
+        
+        .timeline-dot {
+            width: 8px;
+            height: 8px;
+            background: #d4a373;
+            border-radius: 50%;
+            position: relative;
+            z-index: 10;
+        }
+        .timeline-line {
+            width: 2px;
+            background: #f1efed;
+            position: absolute;
+            top: 8px;
+            bottom: -24px;
+            left: 3px;
+        }
+
+        .content-card {
+            background: linear-gradient(to bottom right, #fdfcfb 0%, #f7f5f2 100%);
+            border: 1px solid #eeebe6;
+            box-shadow: 0 4px 15px -5px rgba(0,0,0,0.03);
         }
 
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+
+        .service-img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+        .service-img:hover { transform: scale(1.05); }
+
+        .img-label {
+            font-size: 10px;
+            color: #9ca3af;
+            text-align: center;
+            margin-top: 4px;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -59,24 +124,13 @@
         
         const LOGO_URL = "https://raw.githubusercontent.com/yushen-design/assets/main/js_logo.jpg";
         const ScriptURL = "/api/send";
-            function submitForm(data) {
-              fetch(url, {
-                method: "POST",
-                body: JSON.stringify(data),
-                headers: {
-                  "Content-Type": "text/plain;charset=utf-8", // GAS 有時對 JSON 較敏感，建議維持原來的傳送格式
-                },
-              })
-              .then(response => response.json())
-              .then(result => {
-                console.log("成功：", result);
-                alert("送出成功！");
-              })
-              .catch(error => {
-                console.error("錯誤：", error);
-                alert("送出失敗，請檢查主控台");
-              });
-            }
+
+        // 設計合約章節使用的示意圖網址，您可以在此更改
+        const SERVICE_IMAGES = {
+            model: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&q=80&w=400", // 模型圖
+            renderA: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&q=80&w=400", // 擬真圖 A
+            renderB: "https://images.unsplash.com/photo-1616137422495-1e9e46e2aa77?auto=format&fit=crop&q=80&w=400"  // 擬真圖 B
+        };
 
         const STYLES = [
             { id: 'scandinavian', title: '北歐簡約', img: 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&q=80&w=400' },
@@ -87,11 +141,25 @@
             { id: 'other', title: '其他', img: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&q=80&w=400' }
         ];
 
+        const SOURCES = [
+            { id: 'ig', title: 'Instagram', icon: 'instagram' },
+            { id: 'fb', title: 'Facebook', icon: 'facebook' },
+            { id: 'google', title: 'Google 搜尋', icon: 'search' },
+            { id: 'web', title: '官方網站', icon: 'globe' },
+            { id: 'friend', title: '親友推薦', icon: 'users' },
+            { id: 'other', title: '其他', icon: 'more' }
+        ];
+
         const Icon = ({ name, className = "" }) => {
             const icons = {
                 chevronRight: <polyline points="9 18 15 12 9 6"/>,
                 chevronLeft: <polyline points="15 18 9 12 15 6"/>,
                 instagram: <g><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></g>,
+                facebook: <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>,
+                search: <g><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></g>,
+                globe: <g><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></g>,
+                users: <g><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></g>,
+                more: <g><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></g>,
                 heart: <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>,
                 check: <polyline points="20 6 9 17 4 12"/>,
                 loader: <g><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></g>
@@ -105,35 +173,28 @@
 
         const INITIAL_STATE = {
             name: '', phone: '', lineId: '', contactTime: '10:00-12:00',
-            houseAge: '0', 
-            spaceType: '住家', spaceTypeOther: '',
-            serviceType: '室內設計與裝潢',
-            location: '台北市', locationOther: '',
-            caseName: '',
-            isHandover: '是', handoverDate: '',
-            size: 25, 
-            budget: '100-200 萬',
-            startDate: '', endDate: '',
-            preferredStyles: [], preferredStylesOther: '',
-            familyCount: '1',
-            hasSpecialMember: [],
-            isFutureFlex: '不需要',
-            purpose: '長期自住',
-            source: 'Instagram', sourceOther: '',
-            note: ''
+            houseAge: '0', spaceType: '住家', serviceType: '室內設計與裝潢',
+            location: '台北市', locationOther: '', caseName: '',
+            isHandover: '是', handoverDate: '', size: 25, 
+            budget: '100-200 萬', startDate: '', endDate: '',
+            preferredStyles: [], preferredStylesOther: '', familyCount: '1',
+            hasSpecialMember: [], isFutureFlex: '不需要',
+            purpose: '長期自住', source: 'Instagram', sourceOther: '', note: ''
         };
 
         function App() {
             const [step, setStep] = useState(0);
+            const [activeFlowIdx, setActiveFlowIdx] = useState(0);
             const [formData, setFormData] = useState(INITIAL_STATE);
             const [isSubmitting, setIsSubmitting] = useState(false);
             const [isSuccess, setIsSuccess] = useState(false);
 
             const nextStep = () => setStep(s => s + 1);
             const prevStep = () => setStep(s => s - 1);
+            const skipToForm = () => setStep(3);
 
             const isPhoneValid = formData.phone.length === 10;
-            const canGoNextStep1 = formData.name.trim() !== '' && isPhoneValid;
+            const canGoNextFromDetails = formData.name.trim() !== '' && isPhoneValid;
 
             const handleToggle = (field, value) => {
                 setFormData(prev => ({
@@ -146,7 +207,6 @@
 
             const handleSubmit = async () => {
                 setIsSubmitting(true);
-                
                 const finalPreferredStyles = [...formData.preferredStyles];
                 if (formData.preferredStylesOther) finalPreferredStyles.push(`其他: ${formData.preferredStylesOther}`);
 
@@ -158,14 +218,10 @@
                 });
 
                 try {
-                    await fetch(`${ScriptURL}?${queryParams.toString()}`, {
-                        method: "POST",
-                        mode: "no-cors"
-                    });
+                    await fetch(`${ScriptURL}?${queryParams.toString()}`, { method: "POST", mode: "no-cors" });
                     setIsSuccess(true);
                 } catch (e) {
-                    console.error(e);
-                    alert("提交失敗，請檢查網路連線。");
+                    alert("提交失敗，請檢查網路。");
                 } finally {
                     setIsSubmitting(false);
                 }
@@ -173,39 +229,181 @@
 
             return (
                 <div className={`min-h-screen flex items-center justify-center p-4 transition-all duration-1000 ${step === 0 ? 'home-bg' : 'bg-stone-50'}`}>
-                    
-                    <div className={`w-full max-w-[480px] rounded-[3rem] overflow-hidden flex flex-col min-h-[760px] shadow-2xl transition-all duration-500 ${step === 0 ? 'glass-card' : 'bg-white border border-stone-100'}`}>
+                    <div className={`w-full max-w-[480px] rounded-[3rem] overflow-hidden flex flex-col min-h-[780px] shadow-2xl transition-all duration-500 ${step === 0 ? 'glass-card' : 'bg-white border border-stone-100'}`}>
                         
                         <div className="flex-1 p-8 md:p-10 flex flex-col justify-center custom-scrollbar overflow-y-auto">
                             
-                            {/* Step 0: 封面 */}
                             {step === 0 && (
                                 <div className="text-center space-y-10 animate-in">
                                     <div className="space-y-6">
-                                        <div className="w-28 h-28 rounded-full mx-auto p-1 bg-white shadow-md overflow-hidden border border-stone-100">
-                                            <img src="logo.jpg" alt="Logo" className="w-full h-full object-cover rounded-full" />
+                                        <div className="w-24 h-24 rounded-full mx-auto p-1 bg-white shadow-md overflow-hidden border border-stone-100">
+                                            <img src={LOGO_URL} alt="Logo" className="w-full h-full object-cover rounded-full" />
                                         </div>
                                         <div className="space-y-2">
-                                            <h2 className="text-stone-400 font-medium tracking-[0.2em] text-xs uppercase">J.S Interior Design</h2>
-                                            <h1 className="text-2xl md:text-3xl font-bold text-stone-800">捷士設計 <span className="font-light text-stone-300 mx-1">|</span> 預約諮詢</h1>
+                                            <h2 className="text-stone-400 font-medium tracking-[0.2em] text-[10px] uppercase">J.S Interior Design</h2>
+                                            <h1 className="text-2xl font-bold text-stone-800">捷士設計 <span className="font-light text-stone-300 mx-1">|</span> 預約諮詢</h1>
                                         </div>
                                     </div>
-                                    <div className="space-y-6 text-stone-600 leading-relaxed font-light text-sm md:text-base">
+                                    <div className="space-y-6 text-stone-600 leading-relaxed font-light text-sm">
                                         <p className="text-lg font-medium text-stone-700">讓我們走進您的理想生活。</p>
                                         <div className="pt-2">
-                                            <a href="https://www.instagram.com/j.s.interior.design/" target="_blank" className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-stone-100 text-xs font-medium hover:bg-stone-50 transition-all">
+                                            <a href="https://www.instagram.com/j.s.interior.design/" target="_blank" className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-stone-100 text-[11px] font-medium hover:bg-stone-50 transition-all">
                                                 <Icon name="instagram" className="w-4 h-4"/> j.s.interior.design
                                             </a>
                                         </div>
                                     </div>
                                     <button onClick={nextStep} className="btn-warm w-full py-5 text-white rounded-2xl font-bold flex items-center justify-center gap-3">
-                                        開啟諮詢表單 <Icon name="chevronRight" className="w-5 h-5"/>
+                                        查看服務流程 <Icon name="chevronRight" className="w-5 h-5"/>
                                     </button>
                                 </div>
                             )}
 
-                            {/* Step 1: 基本資訊 & 時段 */}
                             {step === 1 && (
+                                <div className="animate-in space-y-4 flex flex-col h-full">
+                                    <div className="text-center space-y-2">
+                                        <h2 className="text-2xl font-bold text-stone-800">服務流程</h2>
+                                        <button onClick={skipToForm} className="text-stone-400 text-xs underline underline-offset-4 decoration-stone-200 hover:text-stone-600">跳過解說，開始填寫</button>
+                                    </div>
+                                    
+                                    <div className="flex justify-between items-start px-2 pt-6 pb-2 relative">
+                                        <div className="flow-line-container"></div>
+                                        {['丈量規劃', '設計約', '工程約', '完成'].map((label, i) => (
+                                            <div key={i} className="flow-step" onClick={() => setActiveFlowIdx(i)}>
+                                                <div className={`flow-dot ${activeFlowIdx === i ? 'active' : ''}`}></div>
+                                                <span className={`text-[10px] mt-2 font-bold ${activeFlowIdx === i ? 'text-stone-800' : 'text-stone-300'}`}>{label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="flex-1 relative flex flex-col justify-start py-4">
+                                        <button 
+                                            onClick={() => setActiveFlowIdx(prev => Math.max(0, prev - 1))}
+                                            className={`absolute left-[-15px] top-1/2 -translate-y-1/2 z-20 p-2 text-stone-200 hover:text-stone-400 transition-colors ${activeFlowIdx === 0 ? 'invisible' : ''}`}
+                                        >
+                                            <Icon name="chevronLeft" className="w-7 h-7"/>
+                                        </button>
+                                        <button 
+                                            onClick={() => setActiveFlowIdx(prev => Math.min(3, prev + 1))}
+                                            className={`absolute right-[-15px] top-1/2 -translate-y-1/2 z-20 p-2 text-stone-200 hover:text-stone-400 transition-colors ${activeFlowIdx === 3 ? 'invisible' : ''}`}
+                                        >
+                                            <Icon name="chevronRight" className="w-7 h-7"/>
+                                        </button>
+
+                                        <div key={activeFlowIdx} className="animate-in p-6 content-card rounded-2xl space-y-4 transition-all duration-300">
+                                            <h3 className="font-bold text-stone-800 text-lg flex items-center gap-2">
+                                                <span className="w-2 h-2 rounded-full bg-stone-700"></span> 
+                                                {['初步規劃', '設計合約', '工程實作', '驗收交屋'][activeFlowIdx]}
+                                            </h3>
+                                            <div className="text-stone-500 leading-relaxed space-y-2 text-sm">
+                                                {activeFlowIdx === 0 && (
+                                                    <React.Fragment>
+                                                        <p>● 包含現場會勘、丈量與平面圖製作。</p>
+                                                        <p>● 確認需求並依圖面初步報價。</p>
+                                                        <div className="mt-6 pt-5 border-t border-stone-200">
+                                                            <div className="flex items-baseline justify-between">
+                                                                <span className="text-stone-700 font-bold">費用：4,500 元</span>
+                                                                <span className="text-[10px] text-stone-400 font-normal">後續可折抵設計或工程約</span>
+                                                            </div>
+                                                        </div>
+                                                    </React.Fragment>
+                                                )}
+                                                {activeFlowIdx === 1 && (
+                                                    <React.Fragment>
+                                                        <p>● 繪製細部施工圖與 3D 透視圖。</p>
+                                                        <div className="grid grid-cols-3 gap-2 my-4">
+                                                            <div>
+                                                                <img src="3d1.png" alt="模型圖" className="service-img" />
+                                                                <span className="img-label">模型圖</span>
+                                                            </div>
+                                                            <div>
+                                                                <img src="3d2.png" alt="擬真圖 A" className="service-img" />
+                                                                <span className="img-label">擬真圖 A</span>
+                                                            </div>
+                                                            <div>
+                                                                <img src="3d3.png" alt="擬真圖 B" className="service-img" />
+                                                                <span className="img-label">擬真圖 B</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <p className="flex justify-between"><span>● 模型圖</span><span className="font-medium text-stone-700">2,500 / 坪</span></p>
+                                                            <p className="flex justify-between"><span>● 擬真圖</span><span className="font-medium text-stone-700">4,000 / 坪</span></p>
+                                                        </div>
+                                                    </React.Fragment>
+                                                )}
+                                                {activeFlowIdx === 2 && (
+                                                    <React.Fragment>
+                                                        <p>● 嚴選工班進場，嚴控品質與進度。</p>
+                                                        <p>● 定期回報施作進度與照片記錄。</p>
+                                                        <div className="mt-6 pt-5 border-t border-stone-200">
+                                                            <div className="flex items-baseline justify-between">
+                                                                <span className="text-stone-700 font-bold">監工管理費：10%</span>
+                                                            </div>
+                                                        </div>
+                                                    </React.Fragment>
+                                                )}
+                                                {activeFlowIdx === 3 && (
+                                                    <React.Fragment>
+                                                        <p>● 完工總清收尾，現場點交驗收。</p>
+                                                        <p>● 交付工程保固與保養指南。</p>
+                                                        <div className="h-12 flex items-center justify-center">
+                                                            <Icon name="heart" className="w-4 h-4 text-stone-200"/>
+                                                        </div>
+                                                    </React.Fragment>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button onClick={nextStep} className="btn-warm w-full py-5 text-white rounded-2xl font-bold flex items-center justify-center gap-3">
+                                        下一步：收款規範 <Icon name="chevronRight" className="w-5 h-5"/>
+                                    </button>
+                                </div>
+                            )}
+
+                            {step === 2 && (
+                                <div className="animate-in space-y-6 flex flex-col h-full">
+                                    <div className="text-center space-y-2">
+                                        <h2 className="text-2xl font-bold text-stone-800">收款方式</h2>
+                                        <button onClick={skipToForm} className="text-stone-400 text-xs underline underline-offset-4 decoration-stone-200 hover:text-stone-600">跳過解說，開始填寫</button>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="bg-stone-50 border border-stone-100 p-4 rounded-2xl text-center">
+                                            <p className="text-stone-400 text-[10px] uppercase mb-1 tracking-widest">新成屋</p>
+                                            <p className="text-stone-700 font-bold">70 萬起</p>
+                                        </div>
+                                        <div className="bg-stone-50 border border-stone-100 p-4 rounded-2xl text-center">
+                                            <p className="text-stone-400 text-[10px] uppercase mb-1 tracking-widest">老屋翻新</p>
+                                            <p className="text-stone-700 font-bold">120 萬起</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex-1 space-y-5 relative pl-4 mt-2">
+                                        {[
+                                            {t: '簽約訂金', d: 'NT$ 5,000 元'},
+                                            {t: '第一期 30%', d: '進場首日收取 (扣除訂金)'},
+                                            {t: '第二期 30%', d: '水電拉線完畢'},
+                                            {t: '第三期 30%', d: '木工退場'},
+                                            {t: '第四期 10%', d: '完工驗收'}
+                                        ].map((item, idx, arr) => (
+                                            <div key={idx} className="flex gap-4 items-start relative">
+                                                {idx < arr.length - 1 && <div className="timeline-line"></div>}
+                                                <div className="timeline-dot mt-1.5"></div>
+                                                <div className="space-y-0.5">
+                                                    <h4 className="font-bold text-stone-800 text-sm">{item.t}</h4>
+                                                    <p className="text-stone-500 text-[11px]">{item.d}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="flex gap-4">
+                                        <button onClick={prevStep} className="p-5 rounded-2xl bg-stone-50 text-stone-300"><Icon name="chevronLeft" className="w-6 h-6"/></button>
+                                        <button onClick={nextStep} className="btn-warm flex-1 py-5 text-white rounded-2xl font-bold flex items-center justify-center gap-3">
+                                            開始填寫需求 <Icon name="chevronRight" className="w-5 h-5"/>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+                            {step === 3 && (
                                 <div className="animate-in space-y-6">
                                     <div className="space-y-2">
                                         <h2 className="text-2xl font-bold text-stone-800 tracking-tight">您好，該如何稱呼？</h2>
@@ -239,8 +437,7 @@
                                 </div>
                             )}
 
-                            {/* Step 2-6: 其他中間頁面 (略，代碼邏輯同前，僅保留架構以確保完整性) */}
-                            {step === 2 && (
+                            {step === 4 && (
                                 <div className="animate-in space-y-6">
                                     <h2 className="text-2xl font-bold text-stone-800">房屋狀況與地點</h2>
                                     <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
@@ -281,7 +478,7 @@
                                 </div>
                             )}
 
-                            {step === 3 && (
+                            {step === 5 && (
                                 <div className="animate-in space-y-8">
                                     <h2 className="text-2xl font-bold text-stone-800">坪數與工程預算</h2>
                                     <div className="space-y-6">
@@ -308,23 +505,15 @@
                                 </div>
                             )}
 
-                            {step === 4 && (
+                            {step === 6 && (
                                 <div className="animate-in space-y-6">
-                                    <h2 className="text-2xl font-bold text-stone-800">預計居住成員</h2>
-                                    <div className="space-y-5">
+                                    <h2 className="text-2xl font-bold text-stone-800">居住需求詳細</h2>
+                                    <div className="space-y-5 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                                         <div className="space-y-1.5">
-                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">居住人數 (自填數字)</label>
+                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">居住人數</label>
                                             <div className="relative">
                                                 <input type="number" value={formData.familyCount} onChange={e => setFormData({...formData, familyCount: e.target.value})} className="w-full p-4 rounded-xl border border-stone-100 bg-stone-50 outline-none pr-12" />
                                                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-300">人</span>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">是否預留變動空間</label>
-                                            <div className="grid grid-cols-2 gap-2">
-                                                {['不需要', '需要'].map(f => (
-                                                    <button key={f} onClick={() => setFormData({...formData, isFutureFlex: f})} className={`p-4 rounded-xl border-2 text-sm font-bold ${formData.isFutureFlex === f ? 'border-stone-800 bg-stone-50' : 'border-stone-50 bg-white text-stone-400'}`}>{f}</button>
-                                                ))}
                                             </div>
                                         </div>
                                         <div className="space-y-1.5">
@@ -332,6 +521,14 @@
                                             <div className="grid grid-cols-3 gap-2">
                                                 {['小朋友', '長輩', '寵物'].map(m => (
                                                     <button key={m} onClick={() => handleToggle('hasSpecialMember', m)} className={`p-3 rounded-xl border-2 text-xs font-bold ${formData.hasSpecialMember.includes(m) ? 'border-stone-800 bg-stone-50' : 'border-stone-50 bg-white text-stone-400'}`}>{m}</button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">是否預留變動空間</label>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {['不需要', '需要'].map(f => (
+                                                    <button key={f} onClick={() => setFormData({...formData, isFutureFlex: f})} className={`p-4 rounded-xl border-2 text-sm font-bold ${formData.isFutureFlex === f ? 'border-stone-800 bg-stone-50' : 'border-stone-50 bg-white text-stone-400'}`}>{f}</button>
                                                 ))}
                                             </div>
                                         </div>
@@ -347,48 +544,58 @@
                                 </div>
                             )}
 
-                            {step === 5 && (
+                            {step === 7 && (
                                 <div className="animate-in space-y-6">
-                                    <h2 className="text-2xl font-bold text-stone-800 text-center">心儀的風格方向</h2>
-                                    <div className="grid grid-cols-2 gap-3 max-h-[480px] overflow-y-auto pr-2 custom-scrollbar">
+                                    <h2 className="text-2xl font-bold text-stone-800 text-center">理想空間風格</h2>
+                                    <div className="grid grid-cols-2 gap-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
                                         {STYLES.map(s => (
                                             <div key={s.id} onClick={() => handleToggle('preferredStyles', s.title)} className={`group relative rounded-xl overflow-hidden cursor-pointer border-4 transition-all ${formData.preferredStyles.includes(s.title) ? 'border-stone-800' : 'border-transparent'}`}>
-                                                <img src={s.img} alt={s.title} className="w-full h-28 object-cover" />
+                                                <img src={s.img} alt={s.title} className="w-full h-24 object-cover" />
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-2">
                                                     <span className="text-white text-[10px] font-bold tracking-wider">{s.title}</span>
                                                 </div>
-                                                {formData.preferredStyles.includes(s.title) && (
-                                                    <div className="absolute top-1 right-1 bg-stone-800 text-white rounded-full p-1"><Icon name="check" className="w-3 h-3"/></div>
-                                                )}
+                                                {formData.preferredStyles.includes(s.title) && <div className="absolute top-1 right-1 bg-stone-800 text-white rounded-full p-1"><Icon name="check" className="w-3 h-3"/></div>}
                                             </div>
                                         ))}
                                     </div>
-                                    {formData.preferredStyles.includes('其他') && (
-                                        <input type="text" placeholder="請描述您喜好的風格細節" value={formData.preferredStylesOther} onChange={e => setFormData({...formData, preferredStylesOther: e.target.value})} className="w-full p-4 rounded-xl border border-stone-200 text-sm outline-none animate-in" />
-                                    )}
+                                    <textarea value={formData.note} onChange={e => setFormData({...formData, note: e.target.value})} rows="3" placeholder="還有其他想對設計師說的話或需求嗎？" className="w-full p-4 rounded-xl border border-stone-100 bg-stone-50 outline-none text-sm resize-none"></textarea>
                                 </div>
                             )}
 
-                            {step === 6 && (
-                                <div className="animate-in space-y-6">
-                                    <h2 className="text-2xl font-bold text-stone-800">如何得知捷士設計？</h2>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        {['Instagram', 'Facebook', 'Google (Map/AI)', '官方網站', '設計家', '親友推薦', '其他'].map(s => (
-                                            <button key={s} onClick={() => setFormData({...formData, source: s})} className={`p-3 rounded-xl border-2 text-xs font-bold transition-all ${formData.source === s ? 'border-stone-800 bg-stone-50' : 'border-stone-50 bg-white text-stone-400'}`}>{s}</button>
+                            {step === 8 && (
+                                <div className="animate-in space-y-8">
+                                    <div className="text-center space-y-2">
+                                        <h2 className="text-2xl font-bold text-stone-800">如何得知捷士設計？</h2>
+                                        <p className="text-stone-400 text-sm">請選擇一個來源，讓我們知道在哪相遇</p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {SOURCES.map(s => (
+                                            <button 
+                                                key={s.id} 
+                                                onClick={() => setFormData({...formData, source: s.title})} 
+                                                className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all gap-3 ${formData.source === s.title ? 'border-stone-800 bg-stone-50 shadow-inner' : 'border-stone-50 bg-white text-stone-400 hover:border-stone-100'}`}
+                                            >
+                                                <Icon name={s.icon} className={`w-6 h-6 ${formData.source === s.title ? 'text-stone-800' : 'text-stone-300'}`} />
+                                                <span className={`text-xs font-bold ${formData.source === s.title ? 'text-stone-800' : 'text-stone-400'}`}>{s.title}</span>
+                                            </button>
                                         ))}
                                     </div>
                                     {formData.source === '其他' && (
-                                        <input type="text" placeholder="請填寫具體管道" value={formData.sourceOther} onChange={e => setFormData({...formData, sourceOther: e.target.value})} className="w-full p-3 rounded-xl border border-stone-200 text-sm outline-none" />
+                                        <div className="animate-in space-y-2">
+                                            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest ml-1">請說明來源</label>
+                                            <input 
+                                                type="text" 
+                                                value={formData.sourceOther} 
+                                                onChange={e => setFormData({...formData, sourceOther: e.target.value})} 
+                                                placeholder="例如：報章雜誌、路過門市..." 
+                                                className="w-full p-4 rounded-xl border border-stone-100 bg-stone-50 outline-none text-sm"
+                                            />
+                                        </div>
                                     )}
-                                    <div className="pt-2">
-                                        <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">有什麼話想對我們說的嗎？</label>
-                                        <textarea value={formData.note} onChange={e => setFormData({...formData, note: e.target.value})} rows="4" placeholder="歡迎提供更多您的需求..." className="w-full mt-2 p-4 rounded-xl border border-stone-100 bg-stone-50 outline-none focus:bg-white transition-all resize-none text-sm"></textarea>
-                                    </div>
                                 </div>
                             )}
 
-                            {/* Step 7: 送出頁面 (保留返回按鈕) */}
-                            {step === 7 && (
+                            {step === 9 && (
                                 <div className="text-center space-y-8 animate-in">
                                     <div className="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center mx-auto">
                                         <Icon name={isSuccess ? "check" : "heart"} className={`w-10 h-10 ${isSuccess ? "text-green-500" : "text-stone-200"}`} />
@@ -398,13 +605,13 @@
                                         <p className="text-stone-400 text-sm">{isSuccess ? "我們將在 1-3 個工作天內聯繫您。" : "確認以上資訊無誤即可送出"}</p>
                                     </div>
                                     {!isSuccess && (
-                                        <div className="p-5 bg-stone-50 rounded-2xl text-left text-[11px] space-y-1.5 border border-stone-100 max-h-[200px] overflow-y-auto">
+                                        <div className="p-5 bg-stone-50 rounded-2xl text-left text-[11px] space-y-1.5 border border-stone-100 max-h-[220px] overflow-y-auto custom-scrollbar">
                                             <p className="flex justify-between"><span className="text-stone-400">業主：</span><span className="font-bold">{formData.name}</span></p>
-                                            <p className="flex justify-between"><span className="text-stone-400">時段：</span><span className="font-bold">{formData.contactTime}</span></p>
-                                            <p className="flex justify-between"><span className="text-stone-400">地點：</span><span className="font-bold">{formData.location !== '其他' ? formData.location : formData.locationOther}</span></p>
-                                            <p className="flex justify-between"><span className="text-stone-400">建案：</span><span className="font-bold">{formData.caseName}</span></p>
-                                            <p className="flex justify-between"><span className="text-stone-400">居住：</span><span className="font-bold">{formData.familyCount} 人</span></p>
-                                            <p className="flex justify-between"><span className="text-stone-400">預算：</span><span className="font-bold">{formData.budget}</span></p>
+                                            <p className="flex justify-between"><span className="text-stone-400">電話：</span><span className="font-bold">{formData.phone}</span></p>
+                                            <p className="flex justify-between"><span className="text-stone-400">LINE ID：</span><span className="font-bold">{formData.lineId}</span></p>
+                                            <p className="flex justify-between"><span className="text-stone-400">地點：</span><span className="font-bold">{formData.location === '其他' ? formData.locationOther : formData.location}</span></p>
+                                            <p className="flex justify-between"><span className="text-stone-400">坪數：</span><span className="font-bold">{formData.size} 坪</span></p>
+                                            <p className="flex justify-between"><span className="text-stone-400">來源：</span><span className="font-bold">{formData.source}</span></p>
                                         </div>
                                     )}
                                     {isSuccess ? (
@@ -414,22 +621,17 @@
                                             <button onClick={handleSubmit} disabled={isSubmitting} className="w-full py-5 bg-stone-900 text-white rounded-2xl font-bold flex items-center justify-center gap-3">
                                                 {isSubmitting ? <Icon name="loader" className="w-5 h-5 animate-spin" /> : "確認並送出"}
                                             </button>
-                                            <button onClick={prevStep} disabled={isSubmitting} className="w-full py-4 text-stone-400 font-medium text-sm flex items-center justify-center gap-2">
-                                                <Icon name="chevronLeft" className="w-4 h-4"/> 資訊有誤？返回修改
-                                            </button>
+                                            <button onClick={prevStep} disabled={isSubmitting} className="w-full py-4 text-stone-400 font-medium text-sm">資訊有誤？返回修改</button>
                                         </div>
                                     )}
                                 </div>
                             )}
                         </div>
 
-                        {/* 下方控制按鈕 (僅限中間步驟) */}
-                        {step > 0 && step < 7 && (
+                        {step > 0 && step < 9 && !isSuccess && (
                             <div className="px-8 pb-10 flex gap-4">
-                                <button onClick={prevStep} className="p-5 rounded-2xl bg-stone-50 text-stone-300">
-                                    <Icon name="chevronLeft" className="w-6 h-6"/>
-                                </button>
-                                <button onClick={nextStep} disabled={step === 1 && !canGoNextStep1} className="flex-1 py-5 bg-stone-900 text-white rounded-2xl font-bold disabled:bg-stone-50 disabled:text-stone-200 transition-all flex items-center justify-center gap-2">
+                                <button onClick={prevStep} className="p-5 rounded-2xl bg-stone-50 text-stone-300"><Icon name="chevronLeft" className="w-6 h-6"/></button>
+                                <button onClick={nextStep} disabled={(step === 3 && !canGoNextFromDetails) || (step === 8 && !formData.source)} className="flex-1 py-5 bg-stone-900 text-white rounded-2xl font-bold flex items-center justify-center gap-2 disabled:bg-stone-50 disabled:text-stone-200 transition-all">
                                     下一頁 <Icon name="chevronRight" className="w-5 h-5"/>
                                 </button>
                             </div>
