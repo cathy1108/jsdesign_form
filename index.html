@@ -206,6 +206,10 @@
                                             <input type="tel" maxLength="10" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value.replace(/\D/g, '')})} placeholder="例如：0912345678" className={`w-full p-4 rounded-xl border bg-stone-50 outline-none transition-all ${formData.phone && !isPhoneValid ? 'border-red-100' : 'border-stone-100'}`} />
                                         </div>
                                         <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">LINE ID</label>
+                                            <input type="text" value={formData.lineId} onChange={e => setFormData({...formData, lineId: e.target.value})} placeholder="請填寫您的 LINE ID" className="w-full p-4 rounded-xl border border-stone-100 bg-stone-50 outline-none focus:bg-white focus:ring-2 focus:ring-stone-100 transition-all" />
+                                        </div>
+                                        <div className="space-y-1.5">
                                             <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">方便聯絡的時段</label>
                                             <div className="grid grid-cols-1 gap-2">
                                                 {['10:00-12:00', '13:00-18:00', '18:00-21:00'].map(t => (
