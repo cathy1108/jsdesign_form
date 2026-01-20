@@ -58,7 +58,25 @@
         const { useState } = React;
         
         const LOGO_URL = "https://raw.githubusercontent.com/yushen-design/assets/main/js_logo.jpg";
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbysrdEDmwiASZTG2Lz7IbHBjhqC_BPU2AOuAy2x5Lboy9q_SGSWX4arb-2PxWF_q9c5Ag/exec";
+        const ScriptURL = "/api/send";
+            function submitForm(data) {
+              fetch(url, {
+                method: "POST",
+                body: JSON.stringify(data),
+                headers: {
+                  "Content-Type": "text/plain;charset=utf-8", // GAS 有時對 JSON 較敏感，建議維持原來的傳送格式
+                },
+              })
+              .then(response => response.json())
+              .then(result => {
+                console.log("成功：", result);
+                alert("送出成功！");
+              })
+              .catch(error => {
+                console.error("錯誤：", error);
+                alert("送出失敗，請檢查主控台");
+              });
+            }
 
         const STYLES = [
             { id: 'scandinavian', title: '北歐簡約', img: 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&q=80&w=400' },
@@ -140,7 +158,7 @@
                 });
 
                 try {
-                    await fetch(`${GOOGLE_SCRIPT_URL}?${queryParams.toString()}`, {
+                    await fetch(`${ScriptURL}?${queryParams.toString()}`, {
                         method: "POST",
                         mode: "no-cors"
                     });
