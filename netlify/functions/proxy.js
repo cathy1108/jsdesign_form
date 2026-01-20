@@ -1,5 +1,3 @@
-const fetch = require('node-fetch'); // Netlify 環境已內建 fetch，直接使用即可
-
 exports.handler = async (event, context) => {
   // 從 Netlify 後台的 Environment variables 讀取
   const GAS_URL = process.env.MY_GAS_URL;
