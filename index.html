@@ -35,6 +35,38 @@
             transform: translateY(-2px);
             box-shadow: 0 12px 24px -10px rgba(169, 132, 103, 0.6);
         }
+        /* 顯眼的控制按鈕 */
+        .nav-arrow {
+            width: 44px;
+            height: 44px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: 1px solid #f1efed;
+            color: #a98467;
+            transition: all 0.3s ease;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 30;
+        }
+        .nav-arrow:hover {
+            background: #a98467;
+            color: white;
+            transform: translateY(-50%) scale(1.1);
+        }
+        .nav-arrow.left { left: -12px; }
+        .nav-arrow.right { right: -12px; }
+
+        @keyframes bounce-x {
+            0%, 100% { transform: translateY(-50%) translateX(0); }
+            50% { transform: translateY(-50%) translateX(4px); }
+        }
+        .animate-bounce-x { animation: bounce-x 1.5s infinite; }
+        
         /* 數線流程樣式 */
         .flow-container {
             display: flex;
@@ -364,15 +396,15 @@
                                     <div className="flex-1 relative flex flex-col justify-start py-4">
                                         <button 
                                             onClick={() => setActiveFlowIdx(prev => Math.max(0, prev - 1))}
-                                            className={`absolute left-[-15px] top-1/2 -translate-y-1/2 z-20 p-2 text-stone-200 hover:text-stone-400 transition-colors ${activeFlowIdx === 0 ? 'invisible' : ''}`}
+                                            className={`nav-arrow left ${activeFlowIdx === 0 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
                                         >
-                                            <Icon name="chevronLeft" className="w-7 h-7"/>
+                                            <Icon name="chevronLeft" className="w-6 h-6 stroke-[3px]"/>
                                         </button>
                                         <button 
                                             onClick={() => setActiveFlowIdx(prev => Math.min(3, prev + 1))}
-                                            className={`absolute right-[-15px] top-1/2 -translate-y-1/2 z-20 p-2 text-stone-200 hover:text-stone-400 transition-colors ${activeFlowIdx === 3 ? 'invisible' : ''}`}
+                                            className={`nav-arrow right animate-bounce-x ${activeFlowIdx === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
                                         >
-                                            <Icon name="chevronRight" className="w-7 h-7"/>
+                                            <Icon name="chevronRight" className="w-6 h-6 stroke-[3px]"/>
                                         </button>
 
                                         <div key={activeFlowIdx} className="animate-in p-6 content-card rounded-2xl space-y-4 transition-all duration-300">
