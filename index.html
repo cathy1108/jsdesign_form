@@ -238,10 +238,10 @@
         const STYLES = [
             { id: 'nordic', title: '北歐', img: 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&q=80&w=400' },
             { id: 'minimalist', title: '極簡', img: 'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?auto=format&fit=crop&q=80&w=400' },
-            { id: 'wabisabi', title: '侘寂', img: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=400' },
             { id: 'industrial', title: '工業', img: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&q=80&w=400' },
             { id: 'modern', title: '現代', img: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&q=80&w=400' },
-            { id: 'muji', title: '無印', img: 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&q=80&w=400' }
+            { id: 'muji', title: '無印', img: 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&q=80&w=400' },
+            { id: 'other', title: '其他', img: 'https://images.unsplash.com/photo-1513161455079-7dc1de15ef3e?auto=format&fit=crop&q=80&w=400' }
         ];
 
         const SOURCES = [
@@ -279,7 +279,7 @@
 
         const INITIAL_STATE = {
             name: '', phone: '', lineId: '', contactTime: '10:00-12:00',
-            houseAge: '0', spaceType: '住家', serviceType: '室內設計與裝潢',
+            houseAge: '0', spaceType: '住家', serviceType: '設計與裝潢',
             location: '台北市', locationOther: '', caseName: '',
             isHandover: '是', handoverDate: '', size: 25, 
             budget: '100-200 萬', startDate: '', endDate: '',
@@ -591,14 +591,30 @@
                             {step === 4 && (
                                 <div className="animate-in space-y-6">
                                     <h2 className="text-2xl font-bold text-stone-800">房屋狀況與地點</h2>
-                                    <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                                    <div className="space-y-5 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">空間用途</label>
+                                            <div className="grid grid-cols-3 gap-2">
+                                                {['住家', '店面', '辦公空間'].map(t => (
+                                                    <button key={t} onClick={() => setFormData({...formData, spaceType: t})} className={`p-3 rounded-xl border-2 text-xs font-bold transition-all ${formData.spaceType === t ? 'border-[#a98467] bg-stone-50 text-[#a98467]' : 'border-stone-50 bg-white text-stone-400'}`}>{t}</button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">需要的服務</label>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {['設計與裝潢', '預售屋客變'].map(t => (
+                                                    <button key={t} onClick={() => setFormData({...formData, serviceType: t})} className={`p-3 rounded-xl border-2 text-xs font-bold transition-all ${formData.serviceType === t ? 'border-[#a98467] bg-stone-50 text-[#a98467]' : 'border-stone-50 bg-white text-stone-400'}`}>{t}</button>
+                                                ))}
+                                            </div>
+                                        </div>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-1.5">
-                                                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider">屋齡</label>
+                                                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">屋齡 (年)</label>
                                                 <input type="number" value={formData.houseAge} onChange={e => setFormData({...formData, houseAge: e.target.value})} className="w-full p-3 rounded-xl border border-stone-100 bg-stone-50 outline-none" />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider">地點</label>
+                                                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">地點</label>
                                                 <select value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="w-full p-3 rounded-xl border border-stone-100 bg-stone-50 outline-none text-sm">
                                                     {['台北市', '新北市', '桃園', '基隆', '其他'].map(l => <option key={l} value={l}>{l}</option>)}
                                                 </select>
@@ -608,11 +624,11 @@
                                             <input type="text" placeholder="請填寫具體地點" value={formData.locationOther} onChange={e => setFormData({...formData, locationOther: e.target.value})} className="w-full p-3 rounded-xl border border-stone-200 text-sm outline-none" />
                                         )}
                                         <div className="space-y-1.5">
-                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider">建案名稱 / 詳細地址</label>
+                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">建案名稱 / 詳細地址</label>
                                             <input type="text" value={formData.caseName} onChange={e => setFormData({...formData, caseName: e.target.value})} placeholder="例如：捷士大樓" className="w-full p-3 rounded-xl border border-stone-100 bg-stone-50 outline-none" />
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider">交屋狀態</label>
+                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">交屋狀態</label>
                                             <div className="flex gap-2">
                                                 {['是', '否'].map(h => (
                                                     <button key={h} onClick={() => setFormData({...formData, isHandover: h})} className={`flex-1 p-3 rounded-xl border-2 text-sm font-bold ${formData.isHandover === h ? 'border-[#a98467] bg-stone-50 text-[#a98467]' : 'border-stone-50 bg-white text-stone-400'}`}>已交屋: {h}</button>
@@ -620,8 +636,8 @@
                                             </div>
                                         </div>
                                         {formData.isHandover === '否' && (
-                                            <div className="space-y-1.5">
-                                                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider">預計交屋時間</label>
+                                            <div className="space-y-1.5 animate-in">
+                                                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">預計交屋時間</label>
                                                 <input type="date" value={formData.handoverDate} onChange={e => setFormData({...formData, handoverDate: e.target.value})} className="w-full p-3 rounded-xl border border-stone-100 bg-stone-50 outline-none" />
                                             </div>
                                         )}
@@ -644,11 +660,11 @@
                                         </div>
                                         <div className="grid grid-cols-2 gap-4 pt-4">
                                             <div className="space-y-1.5">
-                                                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider">可開工日期</label>
+                                                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">可開工日期</label>
                                                 <input type="date" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} className="w-full p-3 rounded-xl border border-stone-100 bg-stone-50 outline-none text-xs" />
                                             </div>
                                             <div className="space-y-1.5">
-                                                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider">預計完工日</label>
+                                                <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">預計完工日</label>
                                                 <input type="date" value={formData.endDate} onChange={e => setFormData({...formData, endDate: e.target.value})} className="w-full p-3 rounded-xl border border-stone-100 bg-stone-50 outline-none text-xs" />
                                             </div>
                                         </div>
@@ -709,7 +725,19 @@
                                             </div>
                                         ))}
                                     </div>
-                                    <textarea value={formData.note} onChange={e => setFormData({...formData, note: e.target.value})} rows="3" placeholder="還有其他想對設計師說的話或需求嗎？" className="w-full p-4 rounded-xl border border-stone-100 bg-stone-50 outline-none text-sm resize-none"></textarea>
+                                    {formData.preferredStyles.includes('其他') && (
+                                        <div className="animate-in space-y-1.5">
+                                            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest ml-1">自定義風格說明</label>
+                                            <input 
+                                                type="text" 
+                                                value={formData.preferredStylesOther} 
+                                                onChange={e => setFormData({...formData, preferredStylesOther: e.target.value})} 
+                                                placeholder="請描述您喜歡的風格細節..." 
+                                                className="w-full p-4 rounded-xl border border-stone-100 bg-stone-50 outline-none text-sm"
+                                            />
+                                        </div>
+                                    )}
+                                    <textarea value={formData.note} onChange={e => setFormData({...formData, note: e.target.value})} rows="2" placeholder="還有其他想對設計師說的話嗎？" className="w-full p-4 rounded-xl border border-stone-100 bg-stone-50 outline-none text-sm resize-none"></textarea>
                                 </div>
                             )}
 
@@ -724,7 +752,7 @@
                                             <button 
                                                 key={s.id} 
                                                 onClick={() => setFormData({...formData, source: s.title})} 
-                                                className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all gap-3 ${formData.source === s.title ? 'border-stone-800 bg-stone-50 shadow-inner' : 'border-stone-50 bg-white text-stone-400 hover:border-stone-100'}`}
+                                                className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all gap-3 ${formData.source === s.title ? 'border-[#a98467] bg-stone-50 shadow-inner' : 'border-stone-50 bg-white text-stone-400 hover:border-stone-100'}`}
                                             >
                                                 <Icon name={s.icon} className={`w-6 h-6 ${formData.source === s.title ? 'text-[#a98467]' : 'text-stone-300'}`} />
                                                 <span className={`text-xs font-bold ${formData.source === s.title ? 'text-stone-800' : 'text-stone-400'}`}>{s.title}</span>
@@ -759,7 +787,7 @@
                                         <div className="p-5 bg-stone-50 rounded-2xl text-left text-[11px] space-y-1.5 border border-stone-100 max-h-[220px] overflow-y-auto custom-scrollbar">
                                             <p className="flex justify-between"><span className="text-stone-400">業主：</span><span className="font-bold">{formData.name}</span></p>
                                             <p className="flex justify-between"><span className="text-stone-400">電話：</span><span className="font-bold">{formData.phone}</span></p>
-                                            <p className="flex justify-between"><span className="text-stone-400">LINE ID：</span><span className="font-bold">{formData.lineId}</span></p>
+                                            <p className="flex justify-between"><span className="text-stone-400">服務：</span><span className="font-bold">{formData.serviceType}</span></p>
                                             <p className="flex justify-between"><span className="text-stone-400">地點：</span><span className="font-bold">{formData.location === '其他' ? formData.locationOther : formData.location}</span></p>
                                             <p className="flex justify-between"><span className="text-stone-400">坪數：</span><span className="font-bold">{formData.size} 坪</span></p>
                                             <p className="flex justify-between"><span className="text-stone-400">來源：</span><span className="font-bold">{formData.source}</span></p>
