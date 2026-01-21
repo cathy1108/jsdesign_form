@@ -1,8 +1,6 @@
 exports.handler = async (event, context) => {
-  // 從 Netlify 後台的 Environment variables 讀取
   const GAS_URL = process.env.MY_GAS_URL;
 
-  // 檢查是否有設定變數
   if (!GAS_URL) {
     return {
       statusCode: 500,
@@ -11,24 +9,28 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const response = await fetch(GAS_URL, {
-      method: event.httpMethod,
-      body: event.body,
+    // 關鍵修正：將前端傳來的參數 (event.queryStringParameters) 重新組合成字串
+    const qs = new URLSearchParams(event.queryStringParameters).toString();
+    const finalUrl = qs ? `${GAS_URL}?${qs}` : GAS_URL;
+
+    // 發送給 GAS，改用簡單的 GET 即可
+    const response = await fetch(finalUrl, {
+      method: "GET", 
       headers: { 
-        "Content-Type": "application/json",
         "Accept": "application/json"
       }
     });
 
+    // Google 通常會回傳 302 重導向或 HTML/JSON
     const data = await response.text();
 
     return {
       statusCode: 200,
       headers: {
-        "Access-Control-Allow-Origin": "*", // 允許前端呼叫
+        "Access-Control-Allow-Origin": "*",
         "Content-Type": "application/json"
       },
-      body: data,
+      body: JSON.stringify({ message: "Request forwarded", detail: data }),
     };
   } catch (error) {
     return {
