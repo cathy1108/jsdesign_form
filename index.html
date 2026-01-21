@@ -589,10 +589,10 @@
                             )}
 
                             {step === 4 && (
-                                <div className="animate-in space-y-6">
+                                <div className="animate-in space-y-2">
                                     <h2 className="text-2xl font-bold text-stone-800">房屋狀況與地點</h2>
-                                    <div className="space-y-5 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                                        <div className="space-y-1.5">
+                                    <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                                        <div className="space-y-0.5">
                                             <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">空間用途</label>
                                             <div className="grid grid-cols-3 gap-2">
                                                 {['住家', '店面', '辦公空間'].map(t => (
@@ -600,7 +600,7 @@
                                                 ))}
                                             </div>
                                         </div>
-                                        <div className="space-y-1.5">
+                                        <div className="space-y-0.5">
                                             <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">需要的服務</label>
                                             <div className="grid grid-cols-2 gap-2">
                                                 {['設計與裝潢', '預售屋客變'].map(t => (
@@ -609,11 +609,11 @@
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-1.5">
+                                            <div className="space-y-0.5">
                                                 <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">屋齡 (年)</label>
                                                 <input type="number" value={formData.houseAge} onChange={e => setFormData({...formData, houseAge: e.target.value})} className="w-full p-3 rounded-xl border border-stone-100 bg-stone-50 outline-none" />
                                             </div>
-                                            <div className="space-y-1.5">
+                                            <div className="space-y-0.5">
                                                 <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">地點</label>
                                                 <select value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="w-full p-3 rounded-xl border border-stone-100 bg-stone-50 outline-none text-sm">
                                                     {['台北市', '新北市', '桃園', '基隆', '其他'].map(l => <option key={l} value={l}>{l}</option>)}
@@ -623,11 +623,11 @@
                                         {formData.location === '其他' && (
                                             <input type="text" placeholder="請填寫具體地點" value={formData.locationOther} onChange={e => setFormData({...formData, locationOther: e.target.value})} className="w-full p-3 rounded-xl border border-stone-200 text-sm outline-none" />
                                         )}
-                                        <div className="space-y-1.5">
+                                        <div className="space-y-0.5">
                                             <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">建案名稱 / 詳細地址</label>
                                             <input type="text" value={formData.caseName} onChange={e => setFormData({...formData, caseName: e.target.value})} placeholder="例如：捷士大樓" className="w-full p-3 rounded-xl border border-stone-100 bg-stone-50 outline-none" />
                                         </div>
-                                        <div className="space-y-1.5">
+                                        <div className="space-y-0.5">
                                             <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">交屋狀態</label>
                                             <div className="flex gap-2">
                                                 {['是', '否'].map(h => (
@@ -636,7 +636,7 @@
                                             </div>
                                         </div>
                                         {formData.isHandover === '否' && (
-                                            <div className="space-y-1.5 animate-in">
+                                            <div className="space-y-0.5 animate-in">
                                                 <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">預計交屋時間</label>
                                                 <input type="date" value={formData.handoverDate} onChange={e => setFormData({...formData, handoverDate: e.target.value})} className="w-full p-3 rounded-xl border border-stone-100 bg-stone-50 outline-none" />
                                             </div>
@@ -658,7 +658,7 @@
                                                 <button key={b} onClick={() => setFormData({...formData, budget: b})} className={`p-4 rounded-xl border-2 text-xs font-bold transition-all ${formData.budget === b ? 'border-[#a98467] bg-stone-50 text-[#a98467]' : 'border-stone-50 bg-white text-stone-400'}`}>{b}</button>
                                             ))}
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4 pt-4">
+                                        <div className="grid grid-cols-2 gap-8 pt-4">
                                             <div className="space-y-1.5">
                                                 <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">可開工日期</label>
                                                 <input type="date" value={formData.startDate} onChange={e => setFormData({...formData, startDate: e.target.value})} className="w-full p-3 rounded-xl border border-stone-100 bg-stone-50 outline-none text-xs" />
