@@ -303,21 +303,32 @@
 
             const handleSubmit = async () => {
                 setIsSubmitting(true);
-                const finalPreferredStyles = [...formData.preferredStyles];
-                if (formData.preferredStylesOther) finalPreferredStyles.push(`其他: ${formData.preferredStylesOther}`);
+                
+                // 整理複選欄位為字串，方便 Google Sheet 儲存
+                const stylesString = formData.preferredStyles.join(', ');
+                const membersString = formData.hasSpecialMember.join(', ');
 
-                const queryParams = new URLSearchParams({
+                const submissionData = {
                     ...formData,
-                    preferredStyles: finalPreferredStyles.join(', '),
-                    hasSpecialMember: formData.hasSpecialMember.join(', '),
-                    timestamp: new Date().toLocaleString()
-                });
+                    preferredStyles: stylesString,
+                    hasSpecialMember: membersString,
+                    timestamp: new Date().toLocaleString('zh-TW')
+                };
+
+                const queryParams = new URLSearchParams(submissionData);
 
                 try {
-                    await fetch(`${ScriptURL}?${queryParams.toString()}`, { method: "POST", mode: "no-cors" });
+                    // 使用 GET (doGet) 發送，避免 CORS 問題，並設置 mode: 'no-cors'
+                    await fetch(`${SCRIPT_URL}?${queryParams.toString()}`, {
+                        method: "GET",
+                        mode: "no-cors"
+                    });
+                    
+                    // 因為 no-cors 無法讀取 Response，我們假設 fetch 成功即完成
                     setIsSuccess(true);
                 } catch (e) {
-                    alert("提交失敗，請檢查網路。");
+                    console.error("Submission error:", e);
+                    alert("提交失敗，請檢查網路連線或稍後再試。");
                 } finally {
                     setIsSubmitting(false);
                 }
