@@ -320,7 +320,7 @@
 
                 try {
                     // 使用 GET (doGet) 發送，避免 CORS 問題，並設置 mode: 'no-cors'
-                    await fetch(`${SCRIPT_URL}?${queryParams.toString()}`, {
+                    await fetch(`${ScriptURL}?${queryParams.toString()}`, {
                         method: "GET",
                         mode: "no-cors"
                     });
