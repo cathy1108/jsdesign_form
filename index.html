@@ -562,13 +562,10 @@
                                     </div>
                                     <div className="space-y-2">
                                         <div className="space-y-1.5">
-                                            <label className="text-xs font-bold text-stone-400 uppercase tracking-wider ml-1">您的姓名</label>
-                                        </div>
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-bold text-stone-400">您的姓名與稱謂</label>
-                                            <div className="flex flex-col sm:flex-row gap-2">
-                                                <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="例如：蔡明訓" className="flex-1 p-4 rounded-xl border border-stone-100 bg-stone-50 outline-none focus:bg-white focus:ring-2 focus:ring-stone-100 transition-all" />
-                                                <div className="flex bg-stone-50 rounded-xl p-1 border border-stone-100 w-full sm:w-32 h-[58px]">
+                                            <label className="text-xs font-bold text-stone-400">您的姓名</label>
+                                            <div className="flex flex-row gap-2">
+                                                <input type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="例如：蔡明訓" className="flex-1 min-w-0 p-4 rounded-xl border border-stone-100 bg-stone-50 outline-none focus:bg-white focus:ring-2 focus:ring-stone-100 transition-all" />
+                                                <div className="flex bg-stone-50 rounded-xl p-1 border border-stone-100 w-32 shrink-0 h-[58px]">
                                                     {['先生', '小姐'].map((g) => (
                                                         <button key={g} onClick={() => setFormData({...formData, gender: g})} className={`flex-1 rounded-lg text-xs font-bold transition-all ${formData.gender === g ? 'bg-white text-[#a98467] shadow-sm' : 'text-stone-400'}`}>{g}</button>
                                                     ))}
